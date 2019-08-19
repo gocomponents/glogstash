@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gocomponents/core/proto"
-	"glogstash/produce_consume"
+	"github.com/gocomponents/glogstash/produce_consume"
 	"google.golang.org/grpc"
 	"net"
 )

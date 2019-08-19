@@ -3,7 +3,7 @@ package produce_consume
 import (
 	"context"
 	"fmt"
-	"glog/proto"
+	"github.com/gocomponents/core/proto"
 	"google.golang.org/grpc"
 	"testing"
 	"time"
@@ -25,8 +25,8 @@ func TestProduce(t *testing.T) {
 			Module:     "consume",
 			Level:      proto.Log_Info,
 			TraceId:    "123",
-			Message:    []byte("456"),
-			Exception:  nil,
+			Message:    "456",
+			Exception:  "456",
 			UserIp:     "192.168.11.11",
 			ExecTime:   12,
 			CreateTime: time.Now().Add(time.Duration(i) * time.Millisecond).Format("2006-01-02 15:04:05"),

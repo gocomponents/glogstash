@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gocomponents/core/proto"
 	"github.com/gocomponents/core/util"
+	"github.com/gocomponents/glogstash/config"
 	"github.com/olivere/elastic/v7"
-	"glogstash/config"
 	"time"
 )
 
@@ -16,7 +16,7 @@ var client *elastic.Client
 
 func init() {
 	var err error
-	esConfig := config.GetElasticConfig()
+	esConfig :=config.GetElasticConfig()
 	client, err = elastic.NewClient(elastic.SetURL(esConfig), elastic.SetSniff(false))
 	if nil != err {
 		panic(err)
