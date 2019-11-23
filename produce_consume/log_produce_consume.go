@@ -5,8 +5,8 @@ import (
 	"github.com/gocomponents/core/proto"
 	"github.com/gocomponents/core/util"
 	"github.com/gocomponents/glogstash/config"
-	"github.com/golang/glog"
 	"github.com/olivere/elastic/v7"
+	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )
@@ -28,7 +28,7 @@ func init() {
 	}
 	currentIndexName,err=getIndexName(time.Now().Format("2006-01-02 15:04:05"))
 	if err!=nil {
-		glog.Warningf("get currentIndexName error,%s",err.Error())
+		logrus.Warningf("get currentIndexName error,%s",err.Error())
 	}
 }
 
@@ -75,6 +75,7 @@ const logMapping = `
 func createIndex(indexName string) error {
 	exists, err := client.IndexExists(indexName).Do(context.Background())
 	if nil != err {
+		logrus.Errorf("indexExists:%v",err)
 		return err
 	}
 	if !exists {
@@ -97,7 +98,7 @@ func Consume() {
 			go func(log *proto.Log) {
 				defer func() {
 					if err:=recover();err!=nil {
-						glog.Errorf("error:%v,log:%v",err,log)
+						logrus.Errorf("error:%v,log:%v",err,log)
 					}
 				}()
 
@@ -114,7 +115,7 @@ func Consume() {
 						panic(err)
 					}
 					currentIndexName=indexName
-					glog.Infof("createIndex(%s) success",indexName)
+					logrus.Infof("createIndex(%s) success",indexName)
 				}
 
 				_, err = client.Index().

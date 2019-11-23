@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/gocomponents/core/proto"
 	"github.com/gocomponents/glogstash/produce_consume"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"net"
 )
@@ -28,8 +28,8 @@ type server struct{}
 
 func (s *server) Send(ctx context.Context, request *proto.Log) (*proto.Response, error) {
 	defer func() {
-		if info := recover(); info != nil {
-			fmt.Println("post to channel panic", info)
+		if err := recover(); err != nil {
+			logrus.Errorf("post to channel panic,%v", err)
 		}
 	}()
 
