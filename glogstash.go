@@ -29,7 +29,7 @@ type server struct{}
 func (s *server) Send(ctx context.Context, request *proto.Log) (*proto.Response, error) {
 	defer func() {
 		if info := recover(); info != nil {
-			fmt.Println("post to mq panic", info)
+			fmt.Println("post to channel panic", info)
 		}
 	}()
 

@@ -15,9 +15,9 @@ var gLogStashToml *GLogStashToml
 func init()  {
 	var tomlPath string
 	if runtime.GOOS == `windows` {
-		tomlPath = "e:/glog/log.toml"
+		tomlPath = "e:/glog/glogstash.toml"
 	} else {
-		tomlPath = "/config/log.toml"
+		tomlPath = "/config/glogstash.toml"
 	}
 	_, err := toml.DecodeFile(tomlPath, &gLogStashToml)
 	if err != nil{

@@ -2,17 +2,22 @@ package produce_consume
 
 import (
 	"context"
-	"fmt"
 	"github.com/gocomponents/core/proto"
 	"github.com/gocomponents/core/util"
 	"github.com/gocomponents/glogstash/config"
+	"github.com/golang/glog"
 	"github.com/olivere/elastic/v7"
+	"sync"
 	"time"
 )
 
 var logCh = make(chan *proto.Log, 500)
 
 var client *elastic.Client
+
+var currentIndexName string
+
+var currentIndexNameMutex sync.Mutex
 
 func init() {
 	var err error
@@ -21,24 +26,10 @@ func init() {
 	if nil != err {
 		panic(err)
 	}
-	err = createIndex()
-	if nil != err {
-		fmt.Println("create index Error", err)
+	currentIndexName,err=getIndexName(time.Now().Format("2006-01-02 15:04:05"))
+	if err!=nil {
+		glog.Warningf("get currentIndexName error,%s",err.Error())
 	}
-	go func() {
-		ticker := time.NewTicker(10 * time.Minute)
-		for {
-			select {
-			case <-ticker.C:
-				{
-					err = createIndex()
-					if nil != err {
-						fmt.Println("create index Error", err)
-					}
-				}
-			}
-		}
-	}()
 }
 
 const logMapping = `
@@ -81,11 +72,7 @@ const logMapping = `
 }`
 
 //TODO:定时创建新的index
-func createIndex() error {
-	indexName, err := getIndexName(time.Now().Format("2006-01-02 15:04:05"))
-	if nil != err {
-		return err
-	}
+func createIndex(indexName string) error {
 	exists, err := client.IndexExists(indexName).Do(context.Background())
 	if nil != err {
 		return err
@@ -108,22 +95,35 @@ func Consume() {
 		log, ok := <-logCh
 		if ok {
 			go func(log *proto.Log) {
+				defer func() {
+					if err:=recover();err!=nil {
+						glog.Errorf("error:%v,log:%v",err,log)
+					}
+				}()
+
 				indexName, err := getIndexName(log.CreateTime)
 				if nil != err {
-					fmt.Println("ES GetIndexName Error", err)
-					return
+					panic(err)
 				}
-				if nil != err {
-					fmt.Println("ES BodyJsonMarshal Error", err)
-					return
+
+				if currentIndexName!=indexName {
+					currentIndexNameMutex.Lock()
+					defer currentIndexNameMutex.Unlock()
+					err=createIndex(indexName)
+					if nil!=err {
+						panic(err)
+					}
+					currentIndexName=indexName
+					glog.Infof("createIndex(%s) success",indexName)
 				}
+
 				_, err = client.Index().
 					Index(indexName).
 					Id(util.GetGUID()).
 					BodyJson(log).
 					Do(context.Background())
 				if nil != err {
-					fmt.Println("ES Index Error", err)
+					panic(err)
 				}
 			}(log)
 		}

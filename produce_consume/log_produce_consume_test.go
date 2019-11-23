@@ -39,7 +39,7 @@ func TestProduce(t *testing.T) {
 
 //TODO:grpc client
 func TestProduce2(t *testing.T) {
-	conn, err := grpc.Dial("47.244.216.246:18080", grpc.WithInsecure())
+	conn, err := grpc.Dial("*.*.*.*:18080", grpc.WithInsecure())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -54,7 +54,7 @@ func TestProduce2(t *testing.T) {
 			Level:      proto.Log_Info,
 			TraceId:    "123",
 			Message:    "456",
-			Exception:  nil,
+			Exception:  "",
 			UserIp:     "192.168.11.11",
 			ExecTime:   12,
 			CreateTime: time.Now().Add(time.Duration(i) * time.Millisecond).Format("2006-01-02 15:04:05"),
